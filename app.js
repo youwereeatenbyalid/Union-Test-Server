@@ -18,7 +18,7 @@ const wsServer = new webSocketServer({
   httpServer: server
 });
 
-connections = []
+let connections = []
 
 let requestcounter = 0;
 
@@ -41,21 +41,29 @@ wsServer.on("request",(request)=>{
 	connection.on('message', function (message){
 		let msgData = JSON.parse(message.utf8Data)
 		console.log("Recieved message: \""+msgData.message+"\"")
+		console.log(connection)
 		console.log(msgData)
-		let createDate = new Date()
-		console.log(createDate)
-		let responseData = {	
-			messageId:crypto.randomUUID(),
-			message:`Auto Response`,
-			senderId:msgData.recieverId,
-			chatId:msgData.chatId,
-			recieverId:msgData.senderId,
-			date:createDate
-		}
-		console.log("Recieved message: \""+responseData.message+"\"")
-		console.log(responseData)
-		connection.send(JSON.stringify(responseData))
-		console.log("message sent")
+		connections.map(conn =>{
+				console.log(conn)
+				if(conn.senderid == msgData.recieverId){
+					conn.connection.send(JSON.stringify(msgData))
+				}
+			}
+		)
+		//let createDate = new Date()
+		//console.log(createDate)
+		//let responseData = {	
+		//	messageId:crypto.randomUUID(),
+		//	message:`Auto Response`,
+		//	senderId:msgData.recieverId,
+		//	chatId:msgData.chatId,
+		//	recieverId:msgData.senderId,
+		//	date:createDate
+		//}
+		//console.log("Recieved message: \""+responseData.message+"\"")
+		//console.log(responseData)
+		//connection.send(JSON.stringify(responseData))
+		//console.log("message sent")
 	});
 	requestcounter++;
 });
