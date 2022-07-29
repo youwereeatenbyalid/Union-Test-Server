@@ -18,7 +18,7 @@ const wsServer = new webSocketServer({
   httpServer: server
 });
 
-let connections = []
+let connections = new Map()
 
 let requestcounter = 0;
 
@@ -27,23 +27,18 @@ wsServer.on("request",(request)=>{
 	let connection = request.accept(null,request.origin)
 	let senderid = request.httpRequest.url.split("/")[1]
 	console.log(senderid)
-	let hasconnection = connections.find(function(connection){
-		return connection.senderid === senderid;	
-	});
-	if (typeof hasconnection !=='undefined'){
+	if (typeof connections.has(senderid)){
 		console.log("already connected")
-		console.log(hasconnection.senderid)
-	}else{
-		console.log("adding connection")
-		connections.push({senderid:senderid,connection:connection})
 	}
+		console.log("adding connection")
+		connections.set(senderid,{senderid:senderid,connection:connection})
 	
 	connection.on('message', function (message){
 		let msgData = JSON.parse(message.utf8Data)
 		console.log("Recieved message: \""+msgData.message+"\"")
-		console.log(connection)
+		//console.log(connection)
 		console.log(msgData)
-		connections.map(conn =>{
+		connections.forEach(conn =>{
 				console.log(conn)
 				if(conn.senderid == msgData.recieverId){
 					conn.connection.send(JSON.stringify(msgData))
