@@ -47,8 +47,9 @@ wsServer.on("request",(request)=>{
 		let responseData = {	
 			messageId:crypto.randomUUID(),
 			message:`Auto Response`,
-			senderId:4,
+			senderId:msgData.recieverId,
 			chatId:msgData.chatId,
+			recieverId:msgData.senderId,
 			date:createDate
 		}
 		console.log("Recieved message: \""+responseData.message+"\"")

@@ -2,7 +2,7 @@ const webSocketsServerPort = 8000;
 const webSocketServer = require('websocket').server;
 const http = require('http');
 const hostname = '192.168.1.4';
-import { randomUUID } from 'crypto'
+const crypto = require('crypto');
 // Spinning the http server and the websocket server.
 const server = http.createServer((req, res) => {
   res.statusCode = 200;
@@ -45,7 +45,7 @@ wsServer.on("request",(request)=>{
 		let createDate = new Date()
 		console.log(createDate)
 		let responseData = {	
-			messageId:randomUUID(),
+			messageId:crypto.randomUUID(),
 			message:`Auto Response`,
 			senderId:4,
 			chatId:msgData.chatId,
