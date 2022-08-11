@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+	"allowJs": true,
+	"declaration": true ,
+	"esModuleInterop": true,
+	"target": "es6",
+	"module": "commonjs",
+	"outDir": "dist",
+	"sourceMap": true,
+	"types": [
+	    "@types/emscripten"
+	]
+	
+    },
+    "files": [
+	"app.js"
+    ],
+    "include": [
+	"src/**/*.ts"
+    ],
+    "exclude": [
+	"node_modules"
+    ]
+}
