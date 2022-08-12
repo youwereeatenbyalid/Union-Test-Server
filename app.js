@@ -16,6 +16,7 @@ from '@privacyresearch/libsignal-protocol-typescript'
 import { SignalProtocolStore } from './storage-type.ts';
 
 import {
+    FullKeyBundle,
     registerKeyBundle,
     getFullKeyBundle
 } from './key-table.ts';
@@ -36,43 +37,53 @@ const router = express.Router();
 
 router.use(express.json());
 
+
+// address is currently phone number
+
+// Expects an address in the request url and jsonified FullKeyBundle in the body.
+// Returns address on success, null otherwise
 router.post("/registerKeyBundle/:address/", async (req, res)  => {
-    console.log("message body:")
+    console.log("MESSAGE BODY (Expecting FullKeyBundle):")
     console.log(req.body);
-    
     try {
-	const address = await registerKeyBundle(req.params.address,
-					       req.body);
-	console.log("awaiting address");
-	console.log(address);
-	console.log("twas address");
+	const address = await registerKeyBundle(req.params.address, req.body);
+	console.log("ADDRESS ADDED:", address);
+	res.send(address);
     } catch (err) {
 	console.log(err)
+	res.send("${err}");
     }
-
-    res.send(`Post request. data received:${req.body}`);
     return;
 });
 
+// Expects an address in the request url, returns the KeyTableItem(FullKeyBundle extension) for a user
 router.get("/getFullKeyBundle/:address/", async (req, res)  => {
-    console.log("hope this works");
     try {
 	const bundle = await getFullKeyBundle(req.params.address);
-					     
-	console.log("awaiting bundle");
+	console.log("FUll KEY BUNDLE FOR ", address);
 	console.log(bundle);
-	console.log("twas bundle");
-	res.send(JSON.stringify(bundle))
+	res.send(JSON.stringify(bundle));
+    } catch (err) {
+	console.log(err)
+	res.send("${err}");
+    }
+});
 
+// Expects an address in the request url, jsonified SignedPublicKey in the body
+router.post("/replaceSignedPreKey/:address/", async (req, res) => {
+    
+    console.log("MESSAGE BODY (Expecting SignedPublicKey):")
+    console.log(req.body);
+    try {
+	const status = await replaceSignedPreKey(req.params.address,
+					       req.body);
+	console.log(status);
     } catch (err) {
 	console.log(err)
     }
-    
-    return "failed";
 
+    return;
 });
-
-
     
 
 connectToDatabase().then(() => {
@@ -115,4 +126,3 @@ var server_config = {
 //     console.log("Node.js Express HTTPS Server Listening on Port 80");    
 // });
 
->>>>>>> master

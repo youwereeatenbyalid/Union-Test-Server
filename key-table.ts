@@ -2,7 +2,7 @@ import { MongoClient, ObjectId } from 'mongodb';
 
 import {collections} from './database-service';
 
-// All public heys are in fact base64 encoded byte arrays
+// All public keys are in fact base64 encoded byte arrays
 export interface PublicPreKey {
     keyId: number,
     publicKey: string
@@ -13,6 +13,7 @@ export interface SignedPublicKey {
     publicKey: string,
     signature: string
 }
+
 export interface FullKeyBundle {
     registrationId: number,
     identityKey: string,
@@ -105,7 +106,7 @@ export async function replaceOneTimePreKeys(address: string, prekeys: PublicPreK
 // Remove an address from the table
 export async function removeAddress(address: string): Promise<void> {
     try {
-	const r = await collections.keyTable.remove({_id: new ObjectId(address)});
+	const r = await collections.keyTable.deleteOne({_id: new ObjectId(address)});
 	//return;
     } catch (error) {
         console.error(error)
