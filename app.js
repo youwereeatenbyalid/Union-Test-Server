@@ -47,7 +47,7 @@ router.post("/registerKeyBundle/:address/", async (req, res)  => {
     console.log(req.body);
     try {
 	const address = await registerKeyBundle(req.params.address, req.body);
-	console.log("ADDRESS ADDED:", address);
+	console.log("Address Added:", address);
 	res.send(address);
     } catch (err) {
 	console.log(err)
@@ -60,7 +60,7 @@ router.post("/registerKeyBundle/:address/", async (req, res)  => {
 router.get("/getFullKeyBundle/:address/", async (req, res)  => {
     try {
 	const bundle = await getFullKeyBundle(req.params.address);
-	console.log("FUll KEY BUNDLE FOR ", address);
+	console.log("FullKeyBundle for ", address);
 	console.log(bundle);
 	res.send(JSON.stringify(bundle));
     } catch (err) {
@@ -71,20 +71,59 @@ router.get("/getFullKeyBundle/:address/", async (req, res)  => {
 
 // Expects an address in the request url, jsonified SignedPublicKey in the body
 router.post("/replaceSignedPreKey/:address/", async (req, res) => {
-    
     console.log("MESSAGE BODY (Expecting SignedPublicKey):")
     console.log(req.body);
     try {
 	const status = await replaceSignedPreKey(req.params.address,
-					       req.body);
+						 req.body);
 	console.log(status);
     } catch (err) {
 	console.log(err)
     }
-
     return;
 });
-    
+
+// Expects an address in the request url, jsonified PublicPreKey[] in the body
+router.post("/replaceOneTimePreKeys/:address/", async (req, res) => {
+    console.log("MESSAGE BODY (Expecting PublicPreKey[]):")
+    console.log(req.body);
+    try {
+	const status = await replaceOneTimePreKeys(req.params.address,
+						   req.body);
+	console.log(status);
+    } catch (err) {
+	console.log(err)
+    }
+    return;
+});
+
+// Expects an address in the request url, removes address from server
+router.post("/removeAddress/:address/", async (req, res) => {
+    try {
+	const status = await removeAddress(req.params.address,
+					   req.body);
+	console.log("Address removed:", address);
+	console.log(status);
+    } catch (err) {
+	console.log(err)
+    }
+    return;
+});
+
+// Expects an address in the request url, pops and returns public prekey (PublicPreKeyBundle) from server
+router.post("/getPublicPreKeyBundle/:address/", async (req, res) => {
+    try {
+	const bundle = await getPublicPreKeyBundle(req.params.address);
+	console.log("PublicPreKeyBundle for :", address);
+	console.log(bundle);
+	res.send(bundle);
+    } catch (err) {
+	console.log(err)
+	res.send("${err}");
+    }
+    return;
+});
+
 
 connectToDatabase().then(() => {
     app.use('/', router);
