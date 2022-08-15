@@ -1,5 +1,8 @@
 import * as mongoDB from "mongodb";
-export const collections: { keyTable?: mongoDB.Collection } = {}
+export const collections: {
+    keyTable?: mongoDB.Collection,
+    messageTable?: mongoDB.Collection
+} = {}
 
 export async function connectToDatabase () {
 
@@ -12,6 +15,10 @@ export async function connectToDatabase () {
     const keyTable: mongoDB.Collection = db.collection("keyTable");
     
     collections.keyTable = keyTable;
+
+    const messageTable: mongoDB.Collection = db.collection("messageTable");
+    
+    collections.messageTable = messageTable;
 
     console.log("Database loaded");
     return true;

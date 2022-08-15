@@ -18,7 +18,19 @@ import { SignalProtocolStore } from './storage-type.ts';
 import {
     FullKeyBundle,
     registerKeyBundle,
-    getFullKeyBundle
+    getFullKeyBundle,
+    replaceSignedPreKey,
+    replaceOneTimePreKeys,
+    removeAddress,
+    getPublicPreKeyBundle
+} from './key-table.ts';
+
+import {
+    MessageTableItem,
+    storeMessage,
+    getMessagesAfter,
+    getMessagesBefore,
+    deleteMessagesBefore
 } from './key-table.ts';
 
 import MongoClient from 'mongodb';
@@ -28,8 +40,8 @@ import {connectToDatabase} from "./database-service.ts";
 import http from 'http';
 import https from 'https';
 import express from 'express';
+
 const hostname = '167.99.43.209';
-//const hostname = '192.168.1.4';
 
 const app = express();
 
@@ -60,7 +72,7 @@ router.post("/registerKeyBundle/:address/", async (req, res)  => {
 router.get("/getFullKeyBundle/:address/", async (req, res)  => {
     try {
 	const bundle = await getFullKeyBundle(req.params.address);
-	console.log("FullKeyBundle for ", address);
+	console.log("FullKeyBundle for ", req.params.address);
 	console.log(bundle);
 	res.send(JSON.stringify(bundle));
     } catch (err) {
@@ -69,6 +81,7 @@ router.get("/getFullKeyBundle/:address/", async (req, res)  => {
     }
 });
 
+/* Key Table Endpoints*/
 // Expects an address in the request url, jsonified SignedPublicKey in the body
 router.post("/replaceSignedPreKey/:address/", async (req, res) => {
     console.log("MESSAGE BODY (Expecting SignedPublicKey):")
@@ -102,7 +115,7 @@ router.post("/removeAddress/:address/", async (req, res) => {
     try {
 	const status = await removeAddress(req.params.address,
 					   req.body);
-	console.log("Address removed:", address);
+	console.log("Address removed:", req.params.address);
 	console.log(status);
     } catch (err) {
 	console.log(err)
@@ -114,7 +127,7 @@ router.post("/removeAddress/:address/", async (req, res) => {
 router.post("/getPublicPreKeyBundle/:address/", async (req, res) => {
     try {
 	const bundle = await getPublicPreKeyBundle(req.params.address);
-	console.log("PublicPreKeyBundle for :", address);
+	console.log("PublicPreKeyBundle for :", req.params.address);
 	console.log(bundle);
 	res.send(bundle);
     } catch (err) {
@@ -124,44 +137,76 @@ router.post("/getPublicPreKeyBundle/:address/", async (req, res) => {
     return;
 });
 
+/* Message Table Endpoints*/
 
+// Expects an address in the request url, stores a message in the database and returns it as MessageTableItem
+router.post("/storeMessage/:address/", async (req, res) => {
+    console.log("MESSAGE BODY:")
+    console.log(req.body);
+    try {
+	const message = await storeMessage(req.params.address, req.body);
+	console.log("Message Added to Address:", req.params.address);
+	res.send(JSON.stringify(message));
+    } catch (err) {
+	console.log(err)
+	res.send("${err}");
+    }
+    return;    
+});
+
+// Expects and address and timestamp (seconds), returns the messages since then as a MessageTableItem[]
+router.get("/getMessagesAfter/:address/:timestamp/", async (req, res) => {
+    console.log("GETTING MESSAGES FOR", req.params.address, "AFTER", req.params.timestamp);
+    try{
+	const messages = await getMessagesAfter(req.params.address, req.params.timestamp);
+	console.log(messages);
+	res.send(JSON.stringify(messages));
+    } catch (err) {
+	console.log(err)
+	res.send("${err}");
+    }
+});
+
+// Expects and address and timestamp (seconds), returns the messages before then as a MessageTableItem[]
+router.get("/getMessagesBefore/:address/:timestamp/", async (req, res) => {
+    console.log("GETTING MESSAGES FOR", req.params.address, "BEFORE", req.params.timestamp);
+    try{
+	const messages = await getMessagesAfter(req.params.address, req.params.timestamp);
+	console.log(messages);
+	res.send(JSON.stringify(messages));
+    } catch (err) {
+	console.log(err)
+	res.send("${err}");
+    }
+});
+
+// Expects and address and timestamp (seconds), removes the messages for user before date
+router.post("/deleteMessagesBefore/:address/:timestamp/", async (req, res) => {
+    console.log("REMOVING MESSAGES FOR", req.params.address, "BEFORE", req.params.timestamp);
+    try{
+	const messages = await getMessagesAfter(req.params.address, req.params.timestamp);
+	console.log(messages);
+    } catch (err) {
+	console.log(err)
+	res.send("${err}");
+    }
+});
+
+// const routerTest = async () => {
+//     console.log("STARTING ROUTING TESTS");
+
+//     const response = await fetch('localhost:443/getFullKeyBundle/911-911-1912')
+//     const json = await response.json()
+//     console.log(json);
+// }
+
+// Connect to database then start server
 connectToDatabase().then(() => {
     app.use('/', router);
     app.listen(443, () => {
 	console.log(`Server started at http://localhost:${443}`);
     });
+    console.log("t");
+    //routerTest();
 
 });
-
-
-
-// app.post("/getFullKeyBundle/:address", async (req, res) => {
-//     console.log
-// });
-
-// // file location of private key
-// var privateKey = fs.readFileSync( 'private.key' );
-
-// // file location of SSL cert
-// var certificate = fs.readFileSync( 'ssl.crt' );
-
-// set up a config object
-var server_config = {
-    // key : privateKey,
-    // cert: certificate
-};
-
-// create the HTTP server on port 443
-// var http_server = http.createServer(server_config, app).listen(443, function(){
-//     console.log("Node.js Express HTTP Server Listening on Port 443");
-// });
-
-// // create an HTTP server on port 80 and redirect to HTTPS
-// var http_server = http.createServer(function(req,res){    
-//     // 301 redirect (reclassifies google listings)
-//     res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
-//     res.end();
-// }).listen(80, function(err){
-//     console.log("Node.js Express HTTPS Server Listening on Port 80");    
-// });
-
