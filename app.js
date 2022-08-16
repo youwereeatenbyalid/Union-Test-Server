@@ -31,7 +31,7 @@ import {
     getMessagesAfter,
     getMessagesBefore,
     deleteMessagesBefore
-} from './key-table.ts';
+} from './message-table';
 
 import MongoClient from 'mongodb';
 

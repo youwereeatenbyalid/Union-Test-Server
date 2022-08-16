@@ -5,7 +5,7 @@ import {collections} from './database-service';
 import { v4 as uuid } from 'uuid';
 
 export interface MessageTableItem {
-    _id = ObjectId
+    _id: ObjectId
     address: string
     sortID: string
     message: string
@@ -14,11 +14,10 @@ export interface MessageTableItem {
 // Stores a message in the database for address
 export async function storeMessage(address: string, message: string): Promise<MessageTableItem> {
     const sortID = `${Date.now()}-${uuid()}`
-    const item: MessageTableItem = { _id = new ObjectId(sortID), address, sortID, message }
-
+    const item: MessageTableItem = { _id : new ObjectId(sortID), address, sortID, message }
     try {
-	const result = await collections.messageTable.insertOne(item);
-        const result = await dynamoDb.put(params).promise()
+        const result = await collections.messageTable.insertOne(item);
+        //const result2 = await dynamoDb.put(params).promise()
         console.log(JSON.stringify(result))
         return item
     } catch (error) {
@@ -36,9 +35,10 @@ export async function getMessagesAfter(address: string, timestamp: number): Prom
 		$gte: "${timestamp}"
 	    }
 	});
+    const array = await result.toArray();
         console.log(JSON.stringify(result))
-        if (result.Items.length > 0) {
-            const items = result as MessageTableItem[]
+        if (array.length > 0) {
+            const items = array as MessageTableItem[]
             return items
         }
     } catch (error) {
@@ -56,10 +56,10 @@ export async function getMessagesBefore(address: string, timestamp: number): Pro
 		$lte: "${timestamp}"
 	    }
 	});
-	
+	const array = await result.toArray();
         console.log(JSON.stringify(result))
-        if (result.Items.length > 0) {
-            const items = result as MessageTableItem[]
+        if (array.length > 0) {
+            const items = array as MessageTableItem[]
             return items
         }
     } catch (error) {
