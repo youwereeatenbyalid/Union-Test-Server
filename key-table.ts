@@ -18,12 +18,14 @@ export interface FullKeyBundle {
     registrationId: number,
     identityKey: string,
     signedPreKey: SignedPublicKey,
-    oneTimePreKeys: PublicPreKey[]
+    oneTimePreKeys: PublicPreKey[],
+    username:string,
 }
 
 export interface KeyTableItem extends FullKeyBundle {
     _id: ObjectId,
     address: string,
+    suffixes:string[],
     created: number,
     updated: number
 }
@@ -35,12 +37,35 @@ export interface PublicPreKeyBundle {
     registrationId: number,
 }
 
+//suffix generator for partial text search
+function makeSuffixes(values) {
+    var results = [];
+    values.sort().reverse().forEach(function(val) {
+        var tmp, hasSuffix;
+        for (var i=0; i<val.length-2; i++) {
+            tmp = val.substr(i).toUpperCase();
+            hasSuffix = false;
+            for (var j=0; j<results.length; j++) {
+                if (results[j].indexOf(tmp) === 0) {
+                    hasSuffix = true;
+                    break;
+                }
+            }
+            if (!hasSuffix) results.push(tmp);
+        }
+    });
+    return results;
+}
+
 // Register a key bundle with the app, currently update if already exists
 export async function registerKeyBundle(address: string, bundle: FullKeyBundle): Promise<string> {
     const timestamp = new Date().getTime()
     console.log(address.length)
+    const suffi = makeSuffixes([bundle.username]);
+    console.log(suffi)
     const item: KeyTableItem = {
         _id: new ObjectId(address),
+        suffixes:suffi,
 	address:address,
         created: timestamp,
         updated: timestamp,
@@ -60,12 +85,14 @@ export async function registerKeyBundle(address: string, bundle: FullKeyBundle):
     }
 }; //</string>
 
+
+
 // Get the full key bundle for a given address
 export async function getFullKeyBundle(address: string): Promise<KeyTableItem[]> {
     try {
-        const result = await collections.keyTable.find({
-            "username":address
-        });
+        const index = await collections.keyTable.createIndex({username:"text"})
+        const query = {username: { $regex: address,$options: 'i'} };
+        const result = await collections.keyTable.find(query);
         const array =await result.toArray()
             console.log(JSON.stringify(result))
             if (array.length > 0) {
