@@ -41,10 +41,6 @@ import http from 'http';
 import https from 'https';
 import express from 'express';
 
-//const hostname = '167.99.43.209';
-const hostname = '192.168.1.4';
-
-
 const app = express();
 
 const router = express.Router();
@@ -73,10 +69,10 @@ router.post("/registerKeyBundle/:address/", async (req, res)  => {
 // Expects an address in the request url, returns the KeyTableItem(FullKeyBundle extension) for a user
 router.get("/getFullKeyBundle/:address/", async (req, res)  => {
     try {
-	const bundle = await getFullKeyBundle(req.params.address);
+	const bundles = await getFullKeyBundle(req.params.address);
 	console.log("FullKeyBundle for ", req.params.address);
-	console.log(bundle);
-	res.send(JSON.stringify(bundle));
+	console.log(bundles);
+	res.send(JSON.stringify(bundles));
     } catch (err) {
 	console.log(err)
 	res.send("${err}");
@@ -126,7 +122,7 @@ router.post("/removeAddress/:address/", async (req, res) => {
 });
 
 // Expects an address in the request url, pops and returns public prekey (PublicPreKeyBundle) from server
-router.post("/getPublicPreKeyBundle/:address/", async (req, res) => {
+router.get("/getPublicPreKeyBundle/:address/", async (req, res) => {
     try {
 	const bundle = await getPublicPreKeyBundle(req.params.address);
 	console.log("PublicPreKeyBundle for :", req.params.address);

@@ -1,4 +1,4 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import { FindCursor, MongoClient, ObjectId } from 'mongodb';
 
 import {collections} from './database-service';
 
@@ -38,7 +38,7 @@ export interface PublicPreKeyBundle {
 // Register a key bundle with the app, currently update if already exists
 export async function registerKeyBundle(address: string, bundle: FullKeyBundle): Promise<string> {
     const timestamp = new Date().getTime()
-
+    console.log(address.length)
     const item: KeyTableItem = {
         _id: new ObjectId(address),
 	address:address,
@@ -61,16 +61,21 @@ export async function registerKeyBundle(address: string, bundle: FullKeyBundle):
 }; //</string>
 
 // Get the full key bundle for a given address
-export async function getFullKeyBundle(address: string): Promise<KeyTableItem | null> {
+export async function getFullKeyBundle(address: string): Promise<KeyTableItem[]> {
     try {
-	const bundle = (await collections.keyTable.findOne({_id:new ObjectId(address)})) as KeyTableItem;
-	return bundle;
-	//return;
-    } catch (error) {
-        console.error(error)
-	
-    }
-    return null
+        const result = await collections.keyTable.find({
+            "username":address
+        });
+        const array =await result.toArray()
+            console.log(JSON.stringify(result))
+            if (array.length > 0) {
+                const items = array as KeyTableItem[];
+                return items
+            }
+        } catch (error) {
+            console.error(error)
+        }
+        return []
 }
 
 
@@ -120,14 +125,14 @@ export async function getPublicPreKeyBundle(address: string): Promise<PublicPreK
     if (!bundle) {
         return null
     }
-    const preKey = bundle.oneTimePreKeys.pop()
+    const preKey = bundle[0].oneTimePreKeys.pop()
     if (preKey) {
         // remove it from the db
         // TODO: we have a race condition here and we could end up storing a key that another
         // request used.  Need to put this in a transaction.
-        await replaceOneTimePreKeys(address, bundle.oneTimePreKeys)
+        await replaceOneTimePreKeys(address, bundle[0].oneTimePreKeys)
     }
 
-    const { registrationId, identityKey, signedPreKey } = bundle
+    const { registrationId, identityKey, signedPreKey } = bundle[0]
     return { registrationId, identityKey, signedPreKey, preKey }
 }

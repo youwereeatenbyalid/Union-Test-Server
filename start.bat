@@ -1,1 +1,1 @@
-node app.js
+ts-node-esm  app.js

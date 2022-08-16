@@ -17,7 +17,7 @@ export async function storeMessage(address: string, message: string): Promise<Me
     const item: MessageTableItem = { _id = new ObjectId(sortID), address, sortID, message }
 
     try {
-	const result = await collectiosn.messageTable.insertOne(item);
+	const result = await collections.messageTable.insertOne(item);
         const result = await dynamoDb.put(params).promise()
         console.log(JSON.stringify(result))
         return item
