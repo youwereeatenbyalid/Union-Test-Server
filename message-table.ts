@@ -13,7 +13,8 @@ export interface MessageTableItem {
 
 // Stores a message in the database for address
 export async function storeMessage(address: string, message: string): Promise<MessageTableItem> {
-    const sortID = `${Date.now()}-${uuid()}`
+    const dateid = `${Date.now()}${uuid().replace(/-/g,"")}`
+    const sortID = dateid.substring(0,24);
     const item: MessageTableItem = { _id : new ObjectId(sortID), address, sortID, message }
     try {
         const result = await collections.messageTable.insertOne(item);
