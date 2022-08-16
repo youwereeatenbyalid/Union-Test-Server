@@ -20,6 +20,7 @@ export interface FullKeyBundle {
     signedPreKey: SignedPublicKey,
     oneTimePreKeys: PublicPreKey[],
     username:string,
+    pronouns:string,
 }
 
 export interface KeyTableItem extends FullKeyBundle {
