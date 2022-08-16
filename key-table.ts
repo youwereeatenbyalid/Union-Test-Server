@@ -107,6 +107,19 @@ export async function getFullKeyBundle(address: string): Promise<KeyTableItem[]>
 }
 
 
+export async function getFullKeyBundleByID(address: string): Promise<KeyTableItem | null> {
+    try {
+	const bundle = (await collections.keyTable.findOne({_id:new ObjectId(address)})) as KeyTableItem;
+	return bundle;
+	//return;
+    } catch (error) {
+        console.error(error)
+	
+    }
+    return null
+}
+
+
 // Replace the signed pre key for a given address
 export async function replaceSignedPreKey(address: string, signedPublicPreKey: SignedPublicKey): Promise<void> {
     try {

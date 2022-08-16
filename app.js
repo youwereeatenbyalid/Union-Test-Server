@@ -19,6 +19,7 @@ import {
     FullKeyBundle,
     registerKeyBundle,
     getFullKeyBundle,
+    getFullKeyBundleByID,
     replaceSignedPreKey,
     replaceOneTimePreKeys,
     removeAddress,
@@ -70,6 +71,20 @@ router.post("/registerKeyBundle/:address/", async (req, res)  => {
 router.get("/getFullKeyBundle/:address/", async (req, res)  => {
     try {
 	const bundles = await getFullKeyBundle(req.params.address);
+	console.log("FullKeyBundle for ", req.params.address);
+	console.log(bundles);
+	res.send(JSON.stringify(bundles));
+    } catch (err) {
+	console.log(err)
+	res.send("${err}");
+    }
+});
+
+
+// Expects an address in the request url, returns the KeyTableItem(FullKeyBundle extension) for a user
+router.get("/getFullKeyBundleByID/:address/", async (req, res)  => {
+    try {
+	const bundles = await getFullKeyBundleByID(req.params.address);
 	console.log("FullKeyBundle for ", req.params.address);
 	console.log(bundles);
 	res.send(JSON.stringify(bundles));
