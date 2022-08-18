@@ -25,6 +25,8 @@ import {
     removeAddress,
     getPublicPreKeyBundle
 } from './key-table.ts';
+import { Server } from "socket.io";
+
 
 import {
     MessageTableItem,
@@ -42,12 +44,27 @@ import http from 'http';
 import https from 'https';
 import express from 'express';
 
+
+
+
+
 const app = express();
+
+const server = http.createServer(app);
+
+const io = new Server(server);
 
 const router = express.Router();
 
 router.use(express.json());
 
+io.on('connection', (socket) => {
+    console.log('a user connected');
+  });
+  
+server.listen(3000, () => {
+    console.log('listening on *:3000');
+});
 
 // address is currently phone number
 
@@ -160,6 +177,8 @@ router.post("/storeMessage/:address/", async (req, res) => {
 	const message = await storeMessage(req.params.address, req.body);
 	console.log("Message Added to Address:", req.params.address);
 	res.send(JSON.stringify(message));
+    console.log("emmitting")
+    io.emit('message', req.body);
     } catch (err) {
 	console.log(err)
 	res.send("${err}");
