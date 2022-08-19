@@ -28,18 +28,20 @@ export async function storeMessage(address: string, message: string): Promise<Me
 } // </MessageTableItem>
 
 // Get messages after a timestamp
-export async function getMessagesAfter(address: string, timestamp: number): Promise<MessageTableItem[]> {
+export async function getMessagesAfter(address: string, timestamp: string): Promise<MessageTableItem[]> {
     try {
-	const result = collections.messageTable.find({
-	    "address": address,
-	    "sortID": {
-		$gte: "${timestamp}"
-	    }
-	});
+    const result = collections.messageTable.find({
+        "address": address,
+        "message.date": {
+            $gte: "${timestamp}"
+        }
+    });
     const array = await result.toArray();
         console.log(JSON.stringify(result))
         if (array.length > 0) {
             const items = array as MessageTableItem[]
+            console.log(array[0].message.date);
+            console.log(timestamp < array[0].message.date);
             return items
         }
     } catch (error) {

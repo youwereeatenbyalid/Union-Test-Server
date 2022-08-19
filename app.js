@@ -254,7 +254,7 @@ router.get("/getMessagesAfter/:address/:timestamp/", async (req, res) => {
     console.log("GETTING MESSAGES FOR", req.params.address, "AFTER", req.params.timestamp);
     try{
 	const messages = await getMessagesAfter(req.params.address, req.params.timestamp);
-	console.log(messages);
+	//console.log(messages);
 	res.send(JSON.stringify(messages));
     } catch (err) {
 	console.log(err)
